@@ -69,9 +69,9 @@ public class RequestSizeLimitFilter implements Filter {
   }
 
   private boolean hasRequestBody(String method) {
-    return "POST".equalsIgnoreCase(method) ||
-        "PUT".equalsIgnoreCase(method) ||
-        "PATCH".equalsIgnoreCase(method);
+    return "POST".equalsIgnoreCase(method)
+        || "PUT".equalsIgnoreCase(method)
+        || "PATCH".equalsIgnoreCase(method);
   }
 
   private boolean preCheckContentLength(HttpServletRequest request, HttpServletResponse response)
@@ -109,7 +109,8 @@ public class RequestSizeLimitFilter implements Filter {
     response.setHeader("Connection", "close"); // 关闭连接以停止数据传输
 
     String jsonResponse = String.format(
-        "{\"error\":\"Request too large\",\"message\":\"%s\",\"maxSize\":%d,\"actualSize\":%d,\"code\":413}",
+        "{\"error\":\"Request too large\",\"message\":\"%s\","
+            + "\"maxSize\":%d,\"actualSize\":%d,\"code\":413}",
         message, MAX_REQUEST_SIZE, actualSize);
 
     response.getWriter().write(jsonResponse);
@@ -209,7 +210,8 @@ public class RequestSizeLimitFilter implements Filter {
         // 再次检查实际读取的字节数
         if (currentSize > MAX_REQUEST_SIZE) {
           throw new RequestTooLargeException(
-              "1 Request body size " + currentSize + " exceeds limit of " + MAX_REQUEST_SIZE + " bytes",
+              "1 Request body size " + currentSize + " exceeds limit of "
+                  + MAX_REQUEST_SIZE + " bytes",
               currentSize);
         }
 
@@ -265,7 +267,8 @@ public class RequestSizeLimitFilter implements Filter {
         logger.info("3 Request body size {} exceeds limit of " + MAX_REQUEST_SIZE + " bytes",
             currentSize + aboutToRead, currentSize + aboutToRead);
         throw new RequestTooLargeException(
-            "3 Request body size " + (currentSize + aboutToRead) + " exceeds limit of " + MAX_REQUEST_SIZE + " bytes",
+            "3 Request body size " + (currentSize + aboutToRead) + " exceeds limit of "
+                + MAX_REQUEST_SIZE + " bytes",
             currentSize + aboutToRead);
       }
     }
