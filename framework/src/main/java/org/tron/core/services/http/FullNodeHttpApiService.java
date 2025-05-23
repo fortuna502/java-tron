@@ -15,6 +15,7 @@ import org.tron.core.config.args.Args;
 import org.tron.core.services.filter.HttpApiAccessFilter;
 import org.tron.core.services.filter.HttpInterceptor;
 import org.tron.core.services.filter.LiteFnQueryHttpFilter;
+import org.tron.core.services.filter.RequestSizeLimitFilter;
 
 
 @Component("fullNodeHttpApiService")
@@ -263,6 +264,8 @@ public class FullNodeHttpApiService extends HttpService {
   private LiteFnQueryHttpFilter liteFnQueryHttpFilter;
   @Autowired
   private HttpApiAccessFilter httpApiAccessFilter;
+  @Autowired
+  private RequestSizeLimitFilter requestSizeLimitFilter;
   @Autowired
   private GetTransactionFromPendingServlet getTransactionFromPendingServlet;
   @Autowired
@@ -515,6 +518,9 @@ public class FullNodeHttpApiService extends HttpService {
     // filters the specified APIs
     // when node is lite fullnode and openHistoryQueryWhenLiteFN is false
     context.addFilter(new FilterHolder(liteFnQueryHttpFilter), "/*",
+        EnumSet.allOf(DispatcherType.class));
+
+    context.addFilter(new FilterHolder(requestSizeLimitFilter), "/*",
         EnumSet.allOf(DispatcherType.class));
 
     // http access filter, it should have higher priority than HttpInterceptor

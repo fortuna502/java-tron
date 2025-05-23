@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.ConnectionLimit;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.Jetty;
 import org.tron.core.config.args.Args;
 
 @Slf4j(topic = "rpc")
@@ -58,11 +59,27 @@ public abstract class HttpService extends AbstractService {
     if (maxHttpConnectNumber > 0) {
       this.apiServer.addBean(new ConnectionLimit(maxHttpConnectNumber, this.apiServer));
     }
+
+    printJettyVersion();
+  }
+
+  public void printJettyVersion() {
+    String version = Jetty.VERSION;
+    logger.info("Jetty 版本: {}", version);
   }
 
   protected ServletContextHandler initContextHandler() {
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
     context.setContextPath(this.contextPath);
+
+    int maxSize = 5 * 1024 * 1024; // 5 MB
+    context.setMaxFormContentSize(maxSize);
+    context.getServletContext()
+        .setAttribute("org.eclipse.jetty.server.Request.maxRequestSize", maxSize);
+    logger.info("{} set MaxFormContentSize: {}", this.getClass().getSimpleName(), context.getMaxFormContentSize());
+    logger.info("{} set MaxRequestSize: {}", this.getClass().getSimpleName(), context.getServletContext()
+        .getAttribute("org.eclipse.jetty.server.Request.maxRequestSize"));
+
     this.apiServer.setHandler(context);
     return context;
   }
