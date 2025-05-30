@@ -37,13 +37,13 @@ public class FullNodeJsonRpcHttpService extends HttpService {
   @Override
   protected void addFilter(ServletContextHandler context) {
     // filter
-    context.addFilter(new FilterHolder(requestSizeLimitFilter), "/*",
-        EnumSet.allOf(DispatcherType.class));
-
     ServletHandler handler = new ServletHandler();
     FilterHolder fh = handler
         .addFilterWithMapping(HttpInterceptor.class, "/*",
             EnumSet.of(DispatcherType.REQUEST));
     context.addFilter(fh, "/*", EnumSet.of(DispatcherType.REQUEST));
+
+    context.addFilter(new FilterHolder(requestSizeLimitFilter), "/*",
+        EnumSet.allOf(DispatcherType.class));
   }
 }
