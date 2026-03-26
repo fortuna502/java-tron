@@ -1,18 +1,18 @@
 package org.tron.program;
 
-import com.beust.jcommander.JCommander;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.tron.common.application.Application;
 import org.tron.common.application.ApplicationFactory;
 import org.tron.common.application.TronApplicationContext;
+import org.tron.common.arch.Arch;
 import org.tron.common.exit.ExitManager;
 import org.tron.common.log.LogService;
 import org.tron.common.parameter.CommonParameter;
 import org.tron.common.prometheus.Metrics;
-import org.tron.core.Constant;
 import org.tron.core.config.DefaultConfig;
 import org.tron.core.config.args.Args;
+import org.tron.core.exception.TronError;
 
 @Slf4j(topic = "app")
 public class FullNode {
@@ -22,19 +22,21 @@ public class FullNode {
    */
   public static void main(String[] args) {
     ExitManager.initExceptionHandler();
-    logger.info("Full node running.");
-    Args.setParam(args, Constant.TESTNET_CONF);
+    checkJdkVersion();
+    Args.setParam(args, "config.conf");
     CommonParameter parameter = Args.getInstance();
 
     LogService.load(parameter.getLogbackPath());
 
-    if (parameter.isHelp()) {
-      JCommander jCommander = JCommander.newBuilder().addObject(Args.PARAMETER).build();
-      jCommander.parse(args);
-      Args.printHelp(jCommander);
+    if (parameter.isSolidityNode()) {
+      SolidityNode.start();
       return;
     }
-
+    if (parameter.isKeystoreFactory()) {
+      KeystoreFactory.start();
+      return;
+    }
+    logger.info("Full node running.");
     if (Args.getInstance().isDebug()) {
       logger.info("in debug mode, it won't check energy time");
     } else {
@@ -54,5 +56,14 @@ public class FullNode {
     context.registerShutdownHook();
     appT.startup();
     appT.blockUntilShutdown();
+  }
+
+  private static void checkJdkVersion() {
+    try {
+      Arch.throwIfUnsupportedJavaVersion();
+    } catch (UnsupportedOperationException e) {
+      System.err.println(e.getMessage());
+      throw new TronError(e, TronError.ErrCode.JDK_VERSION);
+    }
   }
 }

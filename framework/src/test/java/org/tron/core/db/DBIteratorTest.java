@@ -14,8 +14,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+import org.rocksdb.ReadOptions;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import org.tron.common.TestConstants;
 import org.tron.core.db.common.iterator.RockStoreIterator;
 import org.tron.core.db.common.iterator.StoreIterator;
 
@@ -30,6 +32,7 @@ public class DBIteratorTest {
 
   @Test
   public void testLevelDb() throws IOException {
+    TestConstants.assumeLevelDbAvailable();
     File file = temporaryFolder.newFolder();
     try (DB db = factory.open(file, new Options().createIfMissing(true))) {
       db.put("1".getBytes(StandardCharsets.UTF_8), "1".getBytes(StandardCharsets.UTF_8));
@@ -83,7 +86,7 @@ public class DBIteratorTest {
          RocksDB db = RocksDB.open(options, file.toString())) {
       db.put("1".getBytes(StandardCharsets.UTF_8), "1".getBytes(StandardCharsets.UTF_8));
       db.put("2".getBytes(StandardCharsets.UTF_8), "2".getBytes(StandardCharsets.UTF_8));
-      RockStoreIterator iterator = new RockStoreIterator(db.newIterator());
+      RockStoreIterator iterator = new RockStoreIterator(db.newIterator(), new ReadOptions());
       iterator.seekToFirst();
       Assert.assertArrayEquals("1".getBytes(StandardCharsets.UTF_8), iterator.getKey());
       Assert.assertArrayEquals("1".getBytes(StandardCharsets.UTF_8), iterator.next().getValue());
@@ -99,7 +102,7 @@ public class DBIteratorTest {
         Assert.assertTrue(e instanceof  IllegalStateException);
       }
 
-      iterator = new RockStoreIterator(db.newIterator());
+      iterator = new RockStoreIterator(db.newIterator(),  new ReadOptions());
       iterator.seekToLast();
       Assert.assertArrayEquals("2".getBytes(StandardCharsets.UTF_8), iterator.getKey());
       Assert.assertArrayEquals("2".getBytes(StandardCharsets.UTF_8), iterator.getValue());

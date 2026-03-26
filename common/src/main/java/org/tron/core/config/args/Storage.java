@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.Options;
@@ -42,6 +43,7 @@ import org.tron.common.utils.Sha256Hash;
  * @version 1.0
  * @since 2018/5/25
  */
+@Slf4j(topic = "db")
 public class Storage {
 
   /**
